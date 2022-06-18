@@ -15,17 +15,7 @@ class HotelesController extends Controller
      */
     public function index()
     {
-        //
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
+        return Hoteles::all();
     }
 
     /**
@@ -36,7 +26,9 @@ class HotelesController extends Controller
      */
     public function store(StoreHotelesRequest $request)
     {
-        //
+        $hotel = Hoteles::create($request->all());
+
+        return response()->json($hotel, 201);
     }
 
     /**
@@ -47,18 +39,7 @@ class HotelesController extends Controller
      */
     public function show(Hoteles $hoteles)
     {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Models\Hoteles  $hoteles
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(Hoteles $hoteles)
-    {
-        //
+        return response()->json(Hoteles::find($hoteles), 201);
     }
 
     /**
@@ -70,7 +51,9 @@ class HotelesController extends Controller
      */
     public function update(UpdateHotelesRequest $request, Hoteles $hoteles)
     {
-        //
+        $hoteles->update($request->all());
+
+        return response()->json($hoteles, 200);
     }
 
     /**
@@ -81,6 +64,8 @@ class HotelesController extends Controller
      */
     public function destroy(Hoteles $hoteles)
     {
-        //
+        $hoteles->delete();
+
+        return response()->json(null, 204);
     }
 }
