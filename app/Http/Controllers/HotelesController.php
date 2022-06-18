@@ -27,7 +27,6 @@ class HotelesController extends Controller
     public function store(StoreHotelesRequest $request)
     {
         $hotel = Hoteles::create($request->all());
-
         return response()->json($hotel, 201);
     }
 
