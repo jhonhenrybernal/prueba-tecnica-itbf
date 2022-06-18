@@ -20,5 +20,5 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::resource('hotekes', HotelesController::class);
+Route::resource('hoteles', HotelesController::class);
 Route::resource('habitaciones', HabitacionController::class);
