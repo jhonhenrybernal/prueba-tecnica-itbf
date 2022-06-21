@@ -20,7 +20,7 @@ class CreateHotelesTable extends Migration
             $table->string('ciudad')->nullable();
             $table->integer('num_habitantes')->nullable();
             $table->string('direccion')->nullable();
-            $table->integer('nit')->nullable();
+            $table->string('nit',500)->nullable();
             $table->timestamps();
         });
     }

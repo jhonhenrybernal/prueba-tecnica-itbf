@@ -32,7 +32,14 @@
                     </table>
             </div>
             <div class="col-md-6">
-                <div class="form-group"><!-- Formulario para la creación o modificación de nuestras tareas-->
+                <div class="form-group">
+
+                    <div v-if="viewAlert"  v-bind:class="{'alert alert-danger':activeDanger,'alert alert-success':activeSuccess}" role="alert">
+                        {{listMessageAlert.message}}
+                        <div v-for="(errorArray, idx) in listMessageAlert.errors" :key="idx">
+                            {{ errorArray.join(' ')}} 
+                        </div> 
+                    </div>
                     <label>Nombre</label>
                     <input v-model="nombre" type="text" class="form-control">
 
@@ -53,7 +60,7 @@
                     <!-- Botón que añade los datos del formulario, solo se muestra si la variable update es igual a 0-->
                     <button v-if="update == 0" @click="saveHotel()" class="btn btn-success">Añadir</button>
                     <!-- Botón que modifica la tarea que anteriormente hemos seleccionado, solo se muestra si la variable update es diferente a 0-->
-                    <button v-if="update != 0" @click="updateHotel()" class="btn btn-warning">Actualizar</button>
+                    <button v-if="update != 0" @click="putHotel()" class="btn btn-warning">Actualizar</button>
                     <!-- Botón que limpia el formulario y inicializa la variable a 0, solo se muestra si la variable update es diferente a 0-->
                     <button v-if="update != 0" @click="clearFields()" class="btn">Atrás</button>
                 </div>
@@ -75,23 +82,30 @@
                 update:0, /*Esta variable contrarolará cuando es una nueva tarea o una modificación, si es 0 significará que no hemos seleccionado
                           ninguna tarea, pero si es diferente de 0 entonces tendrá el id de la tarea y no mostrará el boton guardar sino el modificar*/
                 hoteles:[], //Este array contendrá las tareas de nuestra bd
+                activeDanger:false,
+                activeSuccess:false,
+                listMessageAlert:[],
+                viewAlert:false,
+                tipeAlert:''
             }
         },
         methods:{
             getHotel(){
                 let me =this;
+                this.update = 0
                 let url = '/api/hoteles' //Ruta que hemos creado para que nos devuelva todas las tareas
                 axios.get(url).then(function (response) {
                     //creamos un array y guardamos el contenido que nos devuelve el response
                     me.hoteles = response.data;
                 })
                 .catch(function (error) {
-                    // handle error
                     console.log(error);
                 });
+                
             },
             saveHotel(){
                 let me =this;
+                this.viewAlert = false
                 let url = '/api/hoteles' //Ruta que hemos creado para enviar una tarea y guardarla
                 axios.post(url,{ //estas variables son las que enviaremos para que crear la tarea
                     'nombre':this.nombre,
@@ -101,17 +115,30 @@
                     'nit':this.nit,
                 }).then(function (response) {
                     me.getHotel();//llamamos al metodo getTask(); para que refresque nuestro array y muestro los nuevos datos
-                    me.clearFields();//Limpiamos los campos e inicializamos la variable update a 0
+                    me.clearFields();
+                    this.activeDanger = true
+                    this.activeSuccess = true
+                    this.listMessageAlert =  JSON.parse(response.data)
+                    this.viewAlert = true
+                    
                 })
-                .catch(function (error) {
-                    console.log(error);
+                .catch(error => {
+                    if (error.request) {
+                        this.activeDanger = true
+                        this.listMessageAlert = JSON.parse(error.request.response)
+                        this.viewAlert = true    
+                    }
+                    
                 });   
+                setTimeout(() => {
+                    this.viewAlert = false
+                }, 4000);
 
             },
-            updateHotel(){/*Esta funcion, es igual que la anterior, solo que tambien envia la variable update que contiene el id de la
+            putHotel(){/*Esta funcion, es igual que la anterior, solo que tambien envia la variable update que contiene el id de la
                 tarea que queremos modificar*/
                 let me = this;
-                axios.put('/api/hoteles',{
+                axios.put('/api/hoteles/'+me.id,{
                     'nombre':this.nombre,
                     'ciudad':this.ciudad,
                     'num_habitantes':this.num_habitantes,
@@ -130,23 +157,27 @@
                 let me =this;
                 let url = '/api/hoteles/'+this.update;
                 axios.get(url).then(function (response) {
-                    me.nombre=response.nombre;
-                    me.ciudad=response.ciudad;
-                    me.num_habitantes=response.num_habitantes;
-                    me.direccion=response.direccion;
-                    me.nit=response.nit;
+                    me.id=response.data.id;
+                    me.nombre=response.data.nombre;
+                    me.ciudad=response.data.ciudad;
+                    me.num_habitantes=response.data.num_habitantes;
+                    me.direccion=response.data.direccion;
+                    me.nit=response.data.nit;
 
                 })
                 .catch(function (error) {
-                    // handle error
-                    console.log(error);
+                   if (error.request) {
+                        this.activeDanger = true
+                        this.listMessageAlert = JSON.parse(error.request.response)
+                        this.viewAlert = true    
+                    }
                 }); 
             },
             deleteHotel(data){//Esta nos abrirá un alert de javascript y si aceptamos borrará la tarea que hemos elegido
                 let me =this;
                 let id = data.id
                 if (confirm('¿Seguro que deseas borrar este hotel?')) {
-                    axios.delete('/api/hoteles'+id
+                    axios.delete('/api/hoteles/'+id
                     ).then(function (response) {
                         me.getHotel();
                     })

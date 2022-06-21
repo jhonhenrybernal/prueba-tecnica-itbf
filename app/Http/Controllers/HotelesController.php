@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Hoteles;
 use App\Http\Requests\StoreHotelesRequest;
 use App\Http\Requests\UpdateHotelesRequest;
+use PHPUnit\Runner\Hook;
 
 class HotelesController extends Controller
 {
@@ -15,7 +16,7 @@ class HotelesController extends Controller
      */
     public function index()
     {
-        return Hoteles::all();
+        return Hoteles::orderBy('id','desc')->get();
     }
 
     /**
@@ -27,7 +28,7 @@ class HotelesController extends Controller
     public function store(StoreHotelesRequest $request)
     {
         $hotel = Hoteles::create($request->all());
-        return response()->json($hotel, 201);
+        return response()->json(['data'=> $hotel,'message'=> 'Hotel creado exitosamente!'], 201);
     }
 
     /**
@@ -36,9 +37,9 @@ class HotelesController extends Controller
      * @param  \App\Models\Hoteles  $hoteles
      * @return \Illuminate\Http\Response
      */
-    public function show(Hoteles $hoteles)
+    public function show(Hoteles $hoteles,$id)
     {
-        return response()->json(Hoteles::find($hoteles), 201);
+        return response()->json(Hoteles::find($id), 201);
     }
 
     /**
@@ -48,11 +49,12 @@ class HotelesController extends Controller
      * @param  \App\Models\Hoteles  $hoteles
      * @return \Illuminate\Http\Response
      */
-    public function update(UpdateHotelesRequest $request, Hoteles $hoteles)
+    public function update(UpdateHotelesRequest $request, Hoteles $hoteles,$id)
     {
+        $hoteles = Hoteles::find($id);
         $hoteles->update($request->all());
 
-        return response()->json($hoteles, 200);
+        return response()->json(['data'=> $hoteles,'message'=> 'Hotel creado exitosamente!'], 200);
     }
 
     /**
@@ -61,8 +63,9 @@ class HotelesController extends Controller
      * @param  \App\Models\Hoteles  $hoteles
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Hoteles $hoteles)
+    public function destroy(Hoteles $hoteles,$id)
     {
+        $hoteles = Hoteles::find($id);
         $hoteles->delete();
 
         return response()->json(null, 204);
