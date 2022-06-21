@@ -18,6 +18,8 @@ class StoreHabitacionRequest extends FormRequest
 
     /**
      * Get the validation rules that apply to the request.
+     * - No deben existir hoteles repetidos
+     *- No debe existir tipos de habitaciones y acomodaciones repetidas para el mismo hotel
      *
      * @return array
      */

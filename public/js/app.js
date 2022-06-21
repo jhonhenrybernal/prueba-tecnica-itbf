@@ -5431,27 +5431,28 @@ __webpack_require__.r(__webpack_exports__);
     calcCantHabitaciones: function calcCantHabitaciones() {
       var _this = this;
 
-      //filtra la cantidad habitaciones de acuerdo al hotel seleccionado
-      var totalCantidad = this.habitaciones.filter(function (hab) {
+      this.activeDanger = false;
+      this.viewAlert = false; //filtra la cantidad habitaciones de acuerdo al hotel seleccionado
+
+      var cantHabitaciones = this.habitaciones.filter(function (hab) {
         return hab.hotel_id === _this.hotel_id;
       });
-      var cantTotal = 0; //suma el total de habitaciones por el hotel 
+      var cantHabitacionesTotal = 0; //suma el total de habitaciones por el hotel 
 
-      totalCantidad.forEach(function (val, index, array) {
-        cantTotal += val.cantidad;
+      cantHabitaciones.forEach(function (val, index, array) {
+        cantHabitacionesTotal += val.cantidad;
       });
-      var totalForSelect = parseInt(cantTotal) + parseInt(this.cantidad);
+      var totalForSelect = parseInt(cantHabitacionesTotal) + parseInt(this.cantidad); //La cantidad de habitaciones configuradas, no deben superar el máximo por hotel
+
       var filterHotel = this.hoteles.find(function (x) {
         return x.id === _this.hotel_id;
       });
 
       if (filterHotel) {
-        console.log(filterHotel.num_habitaciones > cantTotal);
-
-        if (cantTotal > filterHotel.num_habitaciones) {
+        if (totalForSelect > filterHotel.num_habitaciones) {
           this.activeDanger = true;
           this.listMessageAlert = {
-            message: 'Esta superando la cantidad de habitaciones que el hotel tiene asignado. '
+            message: 'Esta superando la cantidad de habitaciones que este hotel tiene asignado. '
           };
           this.viewAlert = true;
         }
@@ -5483,7 +5484,7 @@ __webpack_require__.r(__webpack_exports__);
         //estas variables son las que enviaremos para que crear la tarea
         'cantidad': this.cantidad,
         'tipo': this.tipo,
-        'acomodacion': this.acomodacion,
+        'acomodacion': this.tipoSelectAsing,
         'hotel_id': this.hotel_id
       }).then(function (response) {
         me.getTasks(); //llamamos al metodo getTask(); para que refresque nuestro array y muestro los nuevos datos
@@ -5494,6 +5495,7 @@ __webpack_require__.r(__webpack_exports__);
         me.activeSuccess = true;
         me.listMessageAlert = JSON.parse(response.data);
         me.viewAlert = true;
+        me.tipoSelectAsing = '';
       })["catch"](function (error) {
         if (error.request) {
           me.activeDanger = true;

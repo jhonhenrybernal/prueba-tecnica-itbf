@@ -93,22 +93,28 @@
         },
         computed:{
             calcCantHabitaciones:function(){
+                  
+                this.activeDanger = false
+                this.viewAlert = false    
+                    
                 //filtra la cantidad habitaciones de acuerdo al hotel seleccionado
-                let totalCantidad = this.habitaciones.filter(hab => hab.hotel_id === this.hotel_id)
-                let cantTotal = 0
+                let cantHabitaciones = this.habitaciones.filter(hab => hab.hotel_id === this.hotel_id)
+                let cantHabitacionesTotal = 0
                 //suma el total de habitaciones por el hotel 
-                totalCantidad.forEach(function(val,index,array){
-                    cantTotal += val.cantidad
+                cantHabitaciones.forEach(function(val,index,array){
+                    cantHabitacionesTotal += val.cantidad
                 })
-                let totalForSelect = parseInt(cantTotal)+parseInt(this.cantidad)
+                let totalForSelect = parseInt(cantHabitacionesTotal)+parseInt(this.cantidad)
+               
+                //La cantidad de habitaciones configuradas, no deben superar el máximo por hotel
                 let filterHotel = this.hoteles.find(x => x.id === this.hotel_id)
                 if (filterHotel) {
-                    console.log(filterHotel.num_habitaciones > cantTotal)
-                    if (cantTotal > filterHotel.num_habitaciones  ) {
+                   
+                    if (totalForSelect > filterHotel.num_habitaciones  ) {
 
                         
                         this.activeDanger = true
-                        this.listMessageAlert = {message:'Esta superando la cantidad de habitaciones que el hotel tiene asignado. '}
+                        this.listMessageAlert = {message:'Esta superando la cantidad de habitaciones que este hotel tiene asignado. '}
                         this.viewAlert = true    
                     
                     }    
@@ -135,7 +141,7 @@
                 axios.post(url,{ //estas variables son las que enviaremos para que crear la tarea
                     'cantidad':this.cantidad,
                     'tipo':this.tipo,
-                    'acomodacion':this.acomodacion,
+                    'acomodacion':this.tipoSelectAsing,
                     'hotel_id':this.hotel_id
                 }).then(function (response) {
                     me.getTasks();//llamamos al metodo getTask(); para que refresque nuestro array y muestro los nuevos datos
@@ -144,6 +150,7 @@
                     me.activeSuccess = true
                     me.listMessageAlert =  JSON.parse(response.data)
                     me.viewAlert = true
+                    me.tipoSelectAsing = '' 
                 })
                 .catch(function (error) {
                      if (error.request) {
