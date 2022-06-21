@@ -10,7 +10,7 @@ En el siguiente lint comparto instrucciones de instacion de postgresSql [postgre
 En el siguiente link comparto instrucciones de instalacion de composer para paquetes de dependencias [composer](https://styde.net/instalacion-de-composer-y-laravel-en-windows/#:~:text=Para%20instalar%20Composer%20en%20Windows,y%20haz%20click%20en%20Next.).
 
 
-Luego el siguiente link comparto instrucciones de instalacion de composer para paquetes de dependencias [composer](https://www.cursosgis.com/como-instalar-node-js-y-npm-en-4-pasos/).
+Luego el siguiente link comparto instrucciones de instalacion de composer para paquetes de dependencias [npm](https://www.cursosgis.com/como-instalar-node-js-y-npm-en-4-pasos/).
 
 
 Luego desde `cmd` Ejecutar lo:
