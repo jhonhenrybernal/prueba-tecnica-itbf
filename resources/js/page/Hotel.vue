@@ -8,7 +8,7 @@
                             <tr>
                                 <th scope="col">Nombre</th>
                                 <th scope="col">Ciudad</th>
-                                <th scope="col">Numero habitantes</th>
+                                <th scope="col">Numero Habitaciones</th>
                                 <th scope="col">Direccion</th>
                                 <th scope="col">Nit</th>
                                  <th scope="col">Acciones</th>
@@ -18,7 +18,7 @@
                             <tr v-for="hotel in hoteles" :key="hotel.id"> <!--Recorremos el array y cargamos nuestra tabla-->
                                 <td v-text="hotel.nombre"></td>
                                 <td v-text="hotel.ciudad"></td>
-                                <td v-text="hotel.num_habitantes"></td>
+                                <td v-text="hotel.num_habitaciones"></td>
                                 <td v-text="hotel.direccion"></td>
                                 <td v-text="hotel.nit"></td>
                                 <td>
@@ -46,8 +46,8 @@
                     <label>Ciudad</label>
                     <input v-model="ciudad" type="text" class="form-control">
 
-                    <label>Numero habitantes</label>
-                    <input v-model="num_habitantes" type="number" class="form-control">
+                    <label>Numero Habitaciones</label>
+                    <input v-model="num_habitaciones" type="number" class="form-control">
 
                     <label>Direccion</label>
                     <input v-model="direccion" type="text" class="form-control">
@@ -76,7 +76,7 @@
                 namePage:'Hoteles',
                 nombre:"", //Esta variable, mediante v-model esta relacionada con el input del formulario
                 ciudad:"", //Esta variable, mediante v-model esta relacionada con el input del formulario
-                num_habitantes:"",
+                num_habitaciones:"",
                 direccion:"",
                 nit:"", //Esta variable, mediante v-model esta relacionada con el input del formulario
                 update:0, /*Esta variable contrarolará cuando es una nueva tarea o una modificación, si es 0 significará que no hemos seleccionado
@@ -110,7 +110,7 @@
                 axios.post(url,{ //estas variables son las que enviaremos para que crear la tarea
                     'nombre':this.nombre,
                     'ciudad':this.ciudad,
-                    'num_habitantes':this.num_habitantes,
+                    'num_habitaciones':this.num_habitaciones,
                     'direccion':this.direccion,
                     'nit':this.nit,
                 }).then(function (response) {
@@ -141,7 +141,7 @@
                 axios.put('/api/hoteles/'+me.id,{
                     'nombre':this.nombre,
                     'ciudad':this.ciudad,
-                    'num_habitantes':this.num_habitantes,
+                    'num_habitaciones':this.num_habitaciones,
                     'direccion':this.direccion,
                     'nit':this.nit,
                 }).then(function (response) {
@@ -160,7 +160,7 @@
                     me.id=response.data.id;
                     me.nombre=response.data.nombre;
                     me.ciudad=response.data.ciudad;
-                    me.num_habitantes=response.data.num_habitantes;
+                    me.num_habitaciones=response.data.num_habitaciones;
                     me.direccion=response.data.direccion;
                     me.nit=response.data.nit;
 
@@ -189,7 +189,7 @@
             clearFields(){/*Limpia los campos e inicializa la variable update a 0*/
                 this.nombre=''
                 this.ciudad=''
-                this.num_habitantes=''
+                this.num_habitaciones=''
                 this.direccion=''
                 this.nit=''
             }

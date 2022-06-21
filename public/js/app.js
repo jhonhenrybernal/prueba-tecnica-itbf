@@ -5377,11 +5377,22 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   data: function data() {
     return {
       namePage: 'Habitaciones',
-      cantidad: "",
+      cantidad: "0",
       //Esta variable, mediante v-model esta relacionada con el input del formulario
       tipo: "",
       //Esta variable, mediante v-model esta relacionada con el input del formulario
@@ -5392,9 +5403,62 @@ __webpack_require__.r(__webpack_exports__);
 
       /*Esta variable contrarolará cuando es una nueva tarea o una modificación, si es 0 significará que no hemos seleccionado
       ninguna tarea, pero si es diferente de 0 entonces tendrá el id de la tarea y no mostrará el boton guardar sino el modificar*/
-      habitaciones: [] //Este array contendrá las tareas de nuestra bd
-
+      habitaciones: [],
+      //Este array contendrá las tareas de nuestra bd
+      hoteles: [],
+      activeDanger: false,
+      activeSuccess: false,
+      listMessageAlert: [],
+      viewAlert: false,
+      tipeAlert: '',
+      listTipo: [{
+        id: 'ESTANDAR',
+        name: 'ESTANDAR',
+        asing: 'Sencilla o Doble'
+      }, {
+        id: 'JUNIOR',
+        name: 'JUNIOR',
+        asing: ' Triple o Cuádruple'
+      }, {
+        id: 'SUITE',
+        name: 'SUITE',
+        asing: ' Sencilla, Doble o Triple'
+      }],
+      tipoSelectAsing: ''
     };
+  },
+  computed: {
+    calcCantHabitaciones: function calcCantHabitaciones() {
+      var _this = this;
+
+      //filtra la cantidad habitaciones de acuerdo al hotel seleccionado
+      var totalCantidad = this.habitaciones.filter(function (hab) {
+        return hab.hotel_id === _this.hotel_id;
+      });
+      var cantTotal = 0; //suma el total de habitaciones por el hotel 
+
+      totalCantidad.forEach(function (val, index, array) {
+        cantTotal += val.cantidad;
+      });
+      var totalForSelect = parseInt(cantTotal) + parseInt(this.cantidad);
+      var filterHotel = this.hoteles.find(function (x) {
+        return x.id === _this.hotel_id;
+      });
+
+      if (filterHotel) {
+        console.log(filterHotel.num_habitaciones > cantTotal);
+
+        if (cantTotal > filterHotel.num_habitaciones) {
+          this.activeDanger = true;
+          this.listMessageAlert = {
+            message: 'Esta superando la cantidad de habitaciones que el hotel tiene asignado. '
+          };
+          this.viewAlert = true;
+        }
+      }
+
+      return this.cantidad;
+    }
   },
   methods: {
     getTasks: function getTasks() {
@@ -5410,6 +5474,8 @@ __webpack_require__.r(__webpack_exports__);
       });
     },
     saveTasks: function saveTasks() {
+      var _this2 = this;
+
       var me = this;
       var url = '/api/habitaciones'; //Ruta que hemos creado para enviar una tarea y guardarla
 
@@ -5423,15 +5489,27 @@ __webpack_require__.r(__webpack_exports__);
         me.getTasks(); //llamamos al metodo getTask(); para que refresque nuestro array y muestro los nuevos datos
 
         me.clearFields(); //Limpiamos los campos e inicializamos la variable update a 0
+
+        me.activeDanger = true;
+        me.activeSuccess = true;
+        me.listMessageAlert = JSON.parse(response.data);
+        me.viewAlert = true;
       })["catch"](function (error) {
-        console.log(error);
+        if (error.request) {
+          me.activeDanger = true;
+          me.listMessageAlert = JSON.parse(error.request.response);
+          me.viewAlert = true;
+        }
       });
+      setTimeout(function () {
+        _this2.viewAlert = false;
+      }, 4000);
     },
     updateTasks: function updateTasks() {
       /*Esta funcion, es igual que la anterior, solo que tambien envia la variable update que contiene el id de la
       tarea que queremos modificar*/
       var me = this;
-      axios.put('/habitaciones/' + this.update, {
+      axios.put('/api/habitaciones/' + this.update, {
         'cantidad': this.cantidad,
         'tipo': this.tipo,
         'acomodacion': this.acomodacion,
@@ -5449,7 +5527,7 @@ __webpack_require__.r(__webpack_exports__);
       //Esta función rellena los campos y la variable update, con la tarea que queremos modificar
       this.update = data.id;
       var me = this;
-      var url = '/habitaciones/' + this.update;
+      var url = '/api/habitaciones/' + this.update;
       axios.get(url).then(function (response) {
         me.cantidad = response.data.cantidad;
         me.tipo = response.data.tipo;
@@ -5466,7 +5544,7 @@ __webpack_require__.r(__webpack_exports__);
       var task_id = data.id;
 
       if (confirm('¿Seguro que deseas borrar esta habitación?')) {
-        axios["delete"]('/tareas/borrar/' + task_id).then(function (response) {
+        axios["delete"]('/api/habitaciones/' + task_id).then(function (response) {
           me.getTasks();
         })["catch"](function (error) {
           console.log(error);
@@ -5479,10 +5557,26 @@ __webpack_require__.r(__webpack_exports__);
       this.tipo = '';
       this.acomodacion = '';
       this.hotel_id = 0;
+    },
+    getHoteles: function getHoteles() {
+      var me = this;
+      var url = '/api/hoteles';
+      axios.get(url).then(function (response) {
+        me.hoteles = response.data;
+      })["catch"](function (error) {
+        console.log(error);
+      });
+    },
+    selectTipo: function selectTipo(tipo) {
+      var me = this;
+      me.tipoSelectAsing = this.listTipo.find(function (x) {
+        return x.name === tipo;
+      }).asing;
     }
   },
   mounted: function mounted() {
     this.getTasks();
+    this.getHoteles();
   }
 });
 
@@ -5499,10 +5593,13 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
-var _methods;
-
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-
+//
+//
+//
+//
+//
+//
+//
 //
 //
 //
@@ -5575,7 +5672,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       //Esta variable, mediante v-model esta relacionada con el input del formulario
       ciudad: "",
       //Esta variable, mediante v-model esta relacionada con el input del formulario
-      num_habitantes: "",
+      num_habitaciones: "",
       direccion: "",
       nit: "",
       //Esta variable, mediante v-model esta relacionada con el input del formulario
@@ -5583,32 +5680,69 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
       /*Esta variable contrarolará cuando es una nueva tarea o una modificación, si es 0 significará que no hemos seleccionado
       ninguna tarea, pero si es diferente de 0 entonces tendrá el id de la tarea y no mostrará el boton guardar sino el modificar*/
-      hoteles: [] //Este array contendrá las tareas de nuestra bd
-
+      hoteles: [],
+      //Este array contendrá las tareas de nuestra bd
+      activeDanger: false,
+      activeSuccess: false,
+      listMessageAlert: [],
+      viewAlert: false,
+      tipeAlert: ''
     };
   },
-  methods: (_methods = {
+  methods: {
     getHotel: function getHotel() {
       var me = this;
+      this.update = 0;
       var url = '/api/hoteles'; //Ruta que hemos creado para que nos devuelva todas las tareas
 
       axios.get(url).then(function (response) {
         //creamos un array y guardamos el contenido que nos devuelve el response
         me.hoteles = response.data;
       })["catch"](function (error) {
-        // handle error
         console.log(error);
       });
     },
     saveHotel: function saveHotel() {
+      var _this = this;
+
       var me = this;
+      this.viewAlert = false;
       var url = '/api/hoteles'; //Ruta que hemos creado para enviar una tarea y guardarla
 
       axios.post(url, {
         //estas variables son las que enviaremos para que crear la tarea
         'nombre': this.nombre,
         'ciudad': this.ciudad,
-        'num_habitantes': this.num_habitantes,
+        'num_habitaciones': this.num_habitaciones,
+        'direccion': this.direccion,
+        'nit': this.nit
+      }).then(function (response) {
+        me.getHotel(); //llamamos al metodo getTask(); para que refresque nuestro array y muestro los nuevos datos
+
+        me.clearFields();
+        this.activeDanger = true;
+        this.activeSuccess = true;
+        this.listMessageAlert = JSON.parse(response.data);
+        this.viewAlert = true;
+      })["catch"](function (error) {
+        if (error.request) {
+          _this.activeDanger = true;
+          _this.listMessageAlert = JSON.parse(error.request.response);
+          _this.viewAlert = true;
+        }
+      });
+      setTimeout(function () {
+        _this.viewAlert = false;
+      }, 4000);
+    },
+    putHotel: function putHotel() {
+      /*Esta funcion, es igual que la anterior, solo que tambien envia la variable update que contiene el id de la
+      tarea que queremos modificar*/
+      var me = this;
+      axios.put('/api/hoteles/' + me.id, {
+        'nombre': this.nombre,
+        'ciudad': this.ciudad,
+        'num_habitaciones': this.num_habitaciones,
         'direccion': this.direccion,
         'nit': this.nit
       }).then(function (response) {
@@ -5619,59 +5753,48 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
         console.log(error);
       });
     },
-    updateHotel: function updateHotel() {
-      /*Esta funcion, es igual que la anterior, solo que tambien envia la variable update que contiene el id de la
-      tarea que queremos modificar*/
+    updateHotel: function updateHotel(data) {
+      //Esta función rellena los campos y la variable update, con la tarea que queremos modificar
+      this.update = data.id;
       var me = this;
-      axios.put('/api/hoteles', {
-        'nombre': this.nombre,
-        'ciudad': this.ciudad,
-        'num_habitantes': this.num_habitantes,
-        'direccion': this.direccion,
-        'nit': this.nit
-      }).then(function (response) {
-        me.getHotel(); //llamamos al metodo getTask(); para que refresque nuestro array y muestro los nuevos datos
-
-        me.clearFields(); //Limpiamos los campos e inicializamos la variable update a 0
+      var url = '/api/hoteles/' + this.update;
+      axios.get(url).then(function (response) {
+        me.id = response.data.id;
+        me.nombre = response.data.nombre;
+        me.ciudad = response.data.ciudad;
+        me.num_habitaciones = response.data.num_habitaciones;
+        me.direccion = response.data.direccion;
+        me.nit = response.data.nit;
       })["catch"](function (error) {
-        console.log(error);
+        if (error.request) {
+          this.activeDanger = true;
+          this.listMessageAlert = JSON.parse(error.request.response);
+          this.viewAlert = true;
+        }
       });
-    }
-  }, _defineProperty(_methods, "updateHotel", function updateHotel(data) {
-    //Esta función rellena los campos y la variable update, con la tarea que queremos modificar
-    this.update = data.id;
-    var me = this;
-    var url = '/api/hoteles/' + this.update;
-    axios.get(url).then(function (response) {
-      me.nombre = response.nombre;
-      me.ciudad = response.ciudad;
-      me.num_habitantes = response.num_habitantes;
-      me.direccion = response.direccion;
-      me.nit = response.nit;
-    })["catch"](function (error) {
-      // handle error
-      console.log(error);
-    });
-  }), _defineProperty(_methods, "deleteHotel", function deleteHotel(data) {
-    //Esta nos abrirá un alert de javascript y si aceptamos borrará la tarea que hemos elegido
-    var me = this;
-    var id = data.id;
+    },
+    deleteHotel: function deleteHotel(data) {
+      //Esta nos abrirá un alert de javascript y si aceptamos borrará la tarea que hemos elegido
+      var me = this;
+      var id = data.id;
 
-    if (confirm('¿Seguro que deseas borrar este hotel?')) {
-      axios["delete"]('/api/hoteles' + id).then(function (response) {
-        me.getHotel();
-      })["catch"](function (error) {
-        console.log(error);
-      });
+      if (confirm('¿Seguro que deseas borrar este hotel?')) {
+        axios["delete"]('/api/hoteles/' + id).then(function (response) {
+          me.getHotel();
+        })["catch"](function (error) {
+          console.log(error);
+        });
+      }
+    },
+    clearFields: function clearFields() {
+      /*Limpia los campos e inicializa la variable update a 0*/
+      this.nombre = '';
+      this.ciudad = '';
+      this.num_habitaciones = '';
+      this.direccion = '';
+      this.nit = '';
     }
-  }), _defineProperty(_methods, "clearFields", function clearFields() {
-    /*Limpia los campos e inicializa la variable update a 0*/
-    this.nombre = '';
-    this.ciudad = '';
-    this.num_habitantes = '';
-    this.direccion = '';
-    this.nit = '';
-  }), _methods),
+  },
   mounted: function mounted() {
     this.getHotel();
   }
@@ -28531,7 +28654,7 @@ var render = function () {
                 }),
                 _vm._v(" "),
                 _c("td", {
-                  domProps: { textContent: _vm._s(habitacion.hotel_id) },
+                  domProps: { textContent: _vm._s(habitacion.hotel.nombre) },
                 }),
                 _vm._v(" "),
                 _c("td", [
@@ -28570,7 +28693,78 @@ var render = function () {
       _vm._v(" "),
       _c("div", { staticClass: "col-md-6" }, [
         _c("div", { staticClass: "form-group" }, [
-          _c("label", [_vm._v("Cantidad")]),
+          _vm.viewAlert
+            ? _c(
+                "div",
+                {
+                  class: {
+                    "alert alert-danger": _vm.activeDanger,
+                    "alert alert-success": _vm.activeSuccess,
+                  },
+                  attrs: { role: "alert" },
+                },
+                [
+                  _vm._v(
+                    "\n                    " +
+                      _vm._s(_vm.listMessageAlert.message) +
+                      "\n                    "
+                  ),
+                  _vm._l(
+                    _vm.listMessageAlert.errors,
+                    function (errorArray, idx) {
+                      return _c("div", { key: idx }, [
+                        _vm._v(
+                          "\n                        " +
+                            _vm._s(errorArray.join(" ")) +
+                            " \n                    "
+                        ),
+                      ])
+                    }
+                  ),
+                ],
+                2
+              )
+            : _vm._e(),
+          _vm._v(" "),
+          _c(
+            "select",
+            {
+              directives: [
+                {
+                  name: "model",
+                  rawName: "v-model",
+                  value: _vm.hotel_id,
+                  expression: "hotel_id",
+                },
+              ],
+              staticClass: "form-control",
+              on: {
+                change: function ($event) {
+                  var $$selectedVal = Array.prototype.filter
+                    .call($event.target.options, function (o) {
+                      return o.selected
+                    })
+                    .map(function (o) {
+                      var val = "_value" in o ? o._value : o.value
+                      return val
+                    })
+                  _vm.hotel_id = $event.target.multiple
+                    ? $$selectedVal
+                    : $$selectedVal[0]
+                },
+              },
+            },
+            _vm._l(_vm.hoteles, function (hotel) {
+              return _c(
+                "option",
+                { key: hotel.id, domProps: { value: hotel.id } },
+                [_vm._v(_vm._s(hotel.nombre))]
+              )
+            }),
+            0
+          ),
+          _vm._v(" "),
+          _c("label", [_vm._v("Cantidad " + _vm._s(_vm.calcCantHabitaciones))]),
           _vm._v(" "),
           _c("input", {
             directives: [
@@ -28582,7 +28776,7 @@ var render = function () {
               },
             ],
             staticClass: "form-control",
-            attrs: { type: "text" },
+            attrs: { type: "number" },
             domProps: { value: _vm.cantidad },
             on: {
               input: function ($event) {
@@ -28596,27 +28790,48 @@ var render = function () {
           _vm._v(" "),
           _c("label", [_vm._v("Tipo")]),
           _vm._v(" "),
-          _c("input", {
-            directives: [
-              {
-                name: "model",
-                rawName: "v-model",
-                value: _vm.tipo,
-                expression: "tipo",
-              },
-            ],
-            staticClass: "form-control",
-            attrs: { type: "text" },
-            domProps: { value: _vm.tipo },
-            on: {
-              input: function ($event) {
-                if ($event.target.composing) {
-                  return
-                }
-                _vm.tipo = $event.target.value
+          _c(
+            "select",
+            {
+              directives: [
+                {
+                  name: "model",
+                  rawName: "v-model",
+                  value: _vm.tipo,
+                  expression: "tipo",
+                },
+              ],
+              staticClass: "form-control",
+              on: {
+                change: [
+                  function ($event) {
+                    var $$selectedVal = Array.prototype.filter
+                      .call($event.target.options, function (o) {
+                        return o.selected
+                      })
+                      .map(function (o) {
+                        var val = "_value" in o ? o._value : o.value
+                        return val
+                      })
+                    _vm.tipo = $event.target.multiple
+                      ? $$selectedVal
+                      : $$selectedVal[0]
+                  },
+                  function ($event) {
+                    return _vm.selectTipo(_vm.tipo)
+                  },
+                ],
               },
             },
-          }),
+            _vm._l(_vm.listTipo, function (list) {
+              return _c(
+                "option",
+                { key: list.id, domProps: { value: list.id } },
+                [_vm._v(_vm._s(list.name))]
+              )
+            }),
+            0
+          ),
           _vm._v(" "),
           _c("label", [_vm._v("Acomodacion")]),
           _vm._v(" "),
@@ -28625,46 +28840,24 @@ var render = function () {
               {
                 name: "model",
                 rawName: "v-model",
-                value: _vm.acomodacion,
-                expression: "acomodacion",
+                value: _vm.tipoSelectAsing,
+                expression: "tipoSelectAsing",
               },
             ],
             staticClass: "form-control",
-            attrs: { type: "text" },
-            domProps: { value: _vm.acomodacion },
+            attrs: { type: "text", disabled: "" },
+            domProps: { value: _vm.tipoSelectAsing },
             on: {
               input: function ($event) {
                 if ($event.target.composing) {
                   return
                 }
-                _vm.acomodacion = $event.target.value
+                _vm.tipoSelectAsing = $event.target.value
               },
             },
           }),
           _vm._v(" "),
           _c("label", [_vm._v("Nombre Hotel")]),
-          _vm._v(" "),
-          _c("input", {
-            directives: [
-              {
-                name: "model",
-                rawName: "v-model",
-                value: _vm.hotel_id,
-                expression: "hotel_id",
-              },
-            ],
-            staticClass: "form-control",
-            attrs: { type: "text" },
-            domProps: { value: _vm.hotel_id },
-            on: {
-              input: function ($event) {
-                if ($event.target.composing) {
-                  return
-                }
-                _vm.hotel_id = $event.target.value
-              },
-            },
-          }),
         ]),
         _vm._v(" "),
         _c("br"),
@@ -28778,7 +28971,7 @@ var render = function () {
                 _c("td", { domProps: { textContent: _vm._s(hotel.ciudad) } }),
                 _vm._v(" "),
                 _c("td", {
-                  domProps: { textContent: _vm._s(hotel.num_habitantes) },
+                  domProps: { textContent: _vm._s(hotel.num_habitaciones) },
                 }),
                 _vm._v(" "),
                 _c("td", {
@@ -28823,6 +29016,39 @@ var render = function () {
       _vm._v(" "),
       _c("div", { staticClass: "col-md-6" }, [
         _c("div", { staticClass: "form-group" }, [
+          _vm.viewAlert
+            ? _c(
+                "div",
+                {
+                  class: {
+                    "alert alert-danger": _vm.activeDanger,
+                    "alert alert-success": _vm.activeSuccess,
+                  },
+                  attrs: { role: "alert" },
+                },
+                [
+                  _vm._v(
+                    "\n                    " +
+                      _vm._s(_vm.listMessageAlert.message) +
+                      "\n                    "
+                  ),
+                  _vm._l(
+                    _vm.listMessageAlert.errors,
+                    function (errorArray, idx) {
+                      return _c("div", { key: idx }, [
+                        _vm._v(
+                          "\n                        " +
+                            _vm._s(errorArray.join(" ")) +
+                            " \n                    "
+                        ),
+                      ])
+                    }
+                  ),
+                ],
+                2
+              )
+            : _vm._e(),
+          _vm._v(" "),
           _c("label", [_vm._v("Nombre")]),
           _vm._v(" "),
           _c("input", {
@@ -28871,26 +29097,26 @@ var render = function () {
             },
           }),
           _vm._v(" "),
-          _c("label", [_vm._v("Numero habitantes")]),
+          _c("label", [_vm._v("Numero Habitaciones")]),
           _vm._v(" "),
           _c("input", {
             directives: [
               {
                 name: "model",
                 rawName: "v-model",
-                value: _vm.num_habitantes,
-                expression: "num_habitantes",
+                value: _vm.num_habitaciones,
+                expression: "num_habitaciones",
               },
             ],
             staticClass: "form-control",
             attrs: { type: "number" },
-            domProps: { value: _vm.num_habitantes },
+            domProps: { value: _vm.num_habitaciones },
             on: {
               input: function ($event) {
                 if ($event.target.composing) {
                   return
                 }
-                _vm.num_habitantes = $event.target.value
+                _vm.num_habitaciones = $event.target.value
               },
             },
           }),
@@ -28969,7 +29195,7 @@ var render = function () {
                   staticClass: "btn btn-warning",
                   on: {
                     click: function ($event) {
-                      return _vm.updateHotel()
+                      return _vm.putHotel()
                     },
                   },
                 },
@@ -29007,7 +29233,7 @@ var staticRenderFns = [
         _vm._v(" "),
         _c("th", { attrs: { scope: "col" } }, [_vm._v("Ciudad")]),
         _vm._v(" "),
-        _c("th", { attrs: { scope: "col" } }, [_vm._v("Numero habitantes")]),
+        _c("th", { attrs: { scope: "col" } }, [_vm._v("Numero Habitaciones")]),
         _vm._v(" "),
         _c("th", { attrs: { scope: "col" } }, [_vm._v("Direccion")]),
         _vm._v(" "),

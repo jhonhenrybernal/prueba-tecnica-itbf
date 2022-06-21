@@ -26,7 +26,7 @@ class StoreHotelesRequest extends FormRequest
         return [
             'nombre' => 'required|unique:hoteles',
             'ciudad' => 'required',
-            'num_habitantes' => 'required',
+            'num_habitaciones' => 'required',
             'direccion' => 'required|unique:hoteles',
             'nit' => 'required'
         ];
@@ -36,7 +36,7 @@ class StoreHotelesRequest extends FormRequest
         return [
             'nombre.required' => 'El campo nombre es requerido',
             'ciudad.required' => 'El campo ciudad es requerido',
-            'num_habitantes.required' => 'El numero de campo habitantes es requerido',
+            'num_habitaciones.required' => 'El numero de campo habitantes es requerido',
             'direccion.required' => 'El campo direccion es requerido',
             'nit.required' => 'El campo nit es requerido',
             'nombre.unique' => 'Este nombre ya existe',

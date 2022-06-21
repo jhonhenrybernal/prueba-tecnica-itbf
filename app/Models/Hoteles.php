@@ -16,7 +16,7 @@ class Hoteles extends Model
     protected $fillable = [
         "nombre",
         "ciudad",
-        "num_habitantes",
+        "num_habitaciones",
         "direccion",
         "nit"
     ];

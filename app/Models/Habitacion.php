@@ -28,6 +28,6 @@ class Habitacion extends Model
      */
     public function hotel()
     {
-        return $this->hasOne('App\Models\Hoteles','hotel_id');
+        return $this->hasOne('App\Models\Hoteles','id','hotel_id');
     }
 }

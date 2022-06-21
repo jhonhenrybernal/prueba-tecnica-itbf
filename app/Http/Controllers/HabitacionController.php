@@ -16,7 +16,7 @@ class HabitacionController extends Controller
      */
     public function index()
     {
-        return Habitacion::all();
+        return Habitacion::with('hotel')->get();
     }
 
     /**
@@ -38,9 +38,9 @@ class HabitacionController extends Controller
      * @param  \App\Models\Habitacion  $habitacion
      * @return \Illuminate\Http\Response
      */
-    public function show(Habitacion $habitacion)
+    public function show(Habitacion $habitacion,$id)
     {
-        return response()->json(Habitacion::find($habitacion), 201);
+        return response()->json(Habitacion::find($id), 201);
     }
 
 
@@ -51,8 +51,9 @@ class HabitacionController extends Controller
      * @param  \App\Models\Habitacion  $habitacion
      * @return \Illuminate\Http\Response
      */
-    public function update(UpdateHabitacionRequest $request, Habitacion $habitacion)
+    public function update(UpdateHabitacionRequest $request, Habitacion $habitacion,$id)
     {
+        $habitacion = Habitacion::find($id);
         $habitacion->update($request->all());
 
         return response()->json($habitacion, 200);
@@ -64,8 +65,9 @@ class HabitacionController extends Controller
      * @param  \App\Models\Habitacion  $habitacion
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Habitacion $habitacion)
+    public function destroy(Habitacion $habitacion,$id)
     {
+        $habitacion = Habitacion::find($id);
         $habitacion->delete();
 
         return response()->json(null, 204);
